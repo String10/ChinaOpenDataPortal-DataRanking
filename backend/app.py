@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import cross_origin
 
 from db import fetch_metadata, fetch_query, fetch_unranked_qd_pair
+from flask import request
 
 app = Flask(__name__)
 
@@ -27,3 +28,13 @@ def get_query(query_id):
 @cross_origin()
 def get_metadata(dataset_id):
     return fetch_metadata(dataset_id)
+
+
+@app.route("/apis/qdpairs/ranking", methods=["POST"])
+@cross_origin()
+def update_ranking():
+    data = request.get_json()
+    dataset_id = data.get("dataset_id")
+    query_id = data.get("query_id")
+    ranking = data.get("ranking")
+    return {"state": 0}

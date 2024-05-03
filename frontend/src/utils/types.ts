@@ -15,3 +15,7 @@ export type QDPair = {
   query_id: string
   dataset_id: string
 }
+
+export type RequestState = {
+  state: number
+}
