@@ -16,30 +16,31 @@ QUERY_TABLE_NAME = os.getenv("QUERY_TABLE_NAME")
 QUERY_ID_START = os.getenv("QUERY_ID_START")
 QUERY_ID_END = os.getenv("QUERY_ID_END")
 
-db = pymysql.connect(
-    host=DB_HOST,
-    port=DB_PORT,
-    user=DB_USER,
-    password=DB_PSWD,
-    database=DATABASE_NAME,
-    charset="utf8",
-)
-
-cursor = db.cursor()
-
 
 def fetch_as_object(query: str):
-    cursor.execute(query)
-    results = cursor.fetchall()
-    columns = [column[0] for column in cursor.description]
-    return [dict(zip(columns, row)) for row in results]
+    db = pymysql.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PSWD,
+        database=DATABASE_NAME,
+        charset="utf8",
+    )
+    try:
+        cursor = db.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        columns = [column[0] for column in cursor.description]
+        return [dict(zip(columns, row)) for row in results]
+    finally:
+        db.close()
 
 
 def fetch_all_qd_pair(amount: int):
     return fetch_as_object(
         f"SELECT DISTINCT dataset_id, query_id FROM {RES_TABLE_NAME} "
         f"WHERE query_id >= {QUERY_ID_START} AND query_id <= {QUERY_ID_END} "
-        f"ORDER BY query_id {'' if amount > 0 else f'LIMIT {amount}'}"
+        f"ORDER BY query_id {f'LIMIT {amount}' if amount > 0 else ''}"
     )
 
 
@@ -47,7 +48,7 @@ def fetch_unranked_qd_pair(amount: int):
     return fetch_as_object(
         f"SELECT DISTINCT dataset_id, query_id FROM {RES_TABLE_NAME} "
         f"WHERE `rank` < 0 AND query_id >= {QUERY_ID_START} AND query_id <= {QUERY_ID_END} "
-        f"ORDER BY query_id {'' if amount > 0 else f'LIMIT {amount}'}"
+        f"ORDER BY query_id {f'LIMIT {amount}' if amount > 0 else ''}"
     )
 
 
