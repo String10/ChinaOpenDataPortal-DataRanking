@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue';
 
-import { update_qdpairs_ranking } from '@/utils/fetch'
-import type { Metadata, Query, RequestState } from '@/utils/types'
+import { update_qdpairs_ranking } from '@/utils/fetch';
+import type { Metadata, Query, RequestState } from '@/utils/types';
 
 const props = defineProps<{
   query: Query | null
   metadata: Metadata | null
 }>()
 
-const rate = ref<number>(0)
+const emit = defineEmits(['refresh'])
+
+const rank = ref<number>(0)
 
 const request_state = ref<RequestState | null>(null)
 const button_type = computed<string>(() => {
@@ -18,13 +20,18 @@ const button_type = computed<string>(() => {
   }
   return request_state.value.state === 0 ? 'success' : 'danger'
 })
-const updateRanking = () => {
-  update_qdpairs_ranking(props.query!.query_id, props.metadata!.dataset_id, rate.value).then(
+const updateRanking = () =>
+  update_qdpairs_ranking(props.metadata!.dataset_id, props.query!.query_id, rank.value).then(
     (res) => {
       request_state.value = res
+      if (res?.state === 0) {
+        emit('refresh')
+
+        rank.value = 0
+        request_state.value = null
+      }
     }
   )
-}
 </script>
 
 <template>
@@ -34,7 +41,7 @@ const updateRanking = () => {
       ><p>{{ metadata?.origin_metadata }}</p></span
     >
     <div class="flex items-center text-sm">
-      <el-radio-group v-model="rate" class="ml-4">
+      <el-radio-group v-model="rank" class="ml-4">
         <el-radio-button label="不相关" value="0" />
         <el-radio-button label="部分相关" value="1" />
         <el-radio-button label="高度相关" value="2" />

@@ -8,24 +8,27 @@ import type { Metadata, Query } from '@/utils/types'
 
 const query = ref<Query | null>(null)
 const metadata = ref<Metadata | null>(null)
-fetch_qdpairs_unranked_one().then((res) => {
-  if (!res) {
-    return
-  }
-  fetch_query(res.query_id).then((res) => {
-    query.value = res
+
+const refresh = () => {
+  fetch_qdpairs_unranked_one().then((res) => {
+    if (!res) {
+      return
+    }
+    fetch_query(res.query_id).then((res) => (query.value = res))
+    fetch_metadata(res.dataset_id).then((res) => (metadata.value = res))
   })
-  fetch_metadata(res.dataset_id).then((res) => {
-    metadata.value = res
-  })
-})
+}
+
+refresh()
 </script>
 
 <template>
   <div class="common-layout">
     <el-container>
-      <el-aside width="300px"> <TaskCard></TaskCard></el-aside>
-      <el-main><DetailCard :query="query" :metadata="metadata"></DetailCard></el-main>
+      <el-aside width="300px"> <TaskCard /></el-aside>
+      <el-main>
+        <DetailCard :query="query" :metadata="metadata" @refresh="refresh" />
+      </el-main>
     </el-container>
   </div>
 </template>

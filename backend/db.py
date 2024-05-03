@@ -17,8 +17,8 @@ QUERY_ID_START = os.getenv("QUERY_ID_START")
 QUERY_ID_END = os.getenv("QUERY_ID_END")
 
 
-def fetch_as_object(query: str):
-    db = pymysql.connect(
+def connect():
+    return pymysql.connect(
         host=DB_HOST,
         port=DB_PORT,
         user=DB_USER,
@@ -26,6 +26,10 @@ def fetch_as_object(query: str):
         database=DATABASE_NAME,
         charset="utf8",
     )
+
+
+def fetch_as_object(query: str):
+    db = connect()
     try:
         cursor = db.cursor()
         cursor.execute(query)
@@ -62,3 +66,19 @@ def fetch_metadata(dataset_id: int):
     return fetch_as_object(
         f"SELECT * FROM {METADATA_TABLE_NAME} WHERE dataset_id = {dataset_id}"
     )[0]
+
+
+def update_ranking(dataset_id: int, query_id: int, rank: int):
+    db = connect()
+    try:
+        cursor = db.cursor()
+        cursor.execute(
+            f"UPDATE {RES_TABLE_NAME} SET `rank` = {rank} "
+            f"WHERE dataset_id = {dataset_id} AND query_id = {query_id}"
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
