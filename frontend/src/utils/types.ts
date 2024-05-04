@@ -9,6 +9,7 @@ export type Metadata = {
   document: string
   origin_metadata: string
   title: string
+  url: string
 }
 
 export type QDPair = {

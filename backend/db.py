@@ -2,6 +2,7 @@ import os
 import pymysql
 
 from dotenv import load_dotenv
+from urlextract import URLExtract
 
 load_dotenv()
 
@@ -63,9 +64,11 @@ def fetch_query(query_id: int):
 
 
 def fetch_metadata(dataset_id: int):
-    return fetch_as_object(
+    metadata = fetch_as_object(
         f"SELECT * FROM {METADATA_TABLE_NAME} WHERE dataset_id = {dataset_id}"
     )[0]
+    metadata["url"] = URLExtract().find_urls(metadata["origin_metadata"])[0]
+    return metadata
 
 
 def update_ranking(dataset_id: int, query_id: int, rank: int):

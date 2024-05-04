@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref } from 'vue'
+import { View as IconView } from '@element-plus/icons-vue'
 
-import { update_qdpairs_ranking } from '@/utils/fetch';
-import type { Metadata, Query, RequestState } from '@/utils/types';
+import { update_qdpairs_ranking } from '@/utils/fetch'
+import type { Metadata, Query, RequestState } from '@/utils/types'
 
 const props = defineProps<{
   query: Query | null
   metadata: Metadata | null
 }>()
 
-const emit = defineEmits(['refresh'])
-
 const rank = ref<number>(0)
 
+// update ranking
+const emit = defineEmits(['refresh'])
 const request_state = ref<RequestState | null>(null)
 const button_type = computed<string>(() => {
   if (request_state.value === null) {
@@ -37,9 +38,7 @@ const updateRanking = () =>
 <template>
   <el-card>
     <h3>{{ query?.query_text }}</h3>
-    <span
-      ><p>{{ metadata?.origin_metadata }}</p></span
-    >
+    <el-link :icon="IconView" :href="metadata?.url">{{ metadata?.url }}</el-link>
     <div class="flex items-center text-sm">
       <el-radio-group v-model="rank" class="ml-4">
         <el-radio-button label="不相关" value="0" />
@@ -50,11 +49,29 @@ const updateRanking = () =>
         request_state && request_state.state > 0 ? '请重试' : '确定'
       }}</el-button>
     </div>
+    <el-divider />
+    <el-table
+      :data="
+        Object.entries(JSON.parse(metadata ? metadata.origin_metadata : '{}')).map(
+          ([key, value]) => ({
+            Key: key,
+            Value: String(value)
+          })
+        )
+      "
+      style="width: 100%"
+    >
+      <el-table-column prop="Key" label="Key" />
+      <el-table-column prop="Value" label="Value" />
+    </el-table>
   </el-card>
 </template>
 
 <style scoped>
 .el-radio-group {
   font-size: unset;
+}
+.el-link {
+  margin-bottom: 8px;
 }
 </style>
