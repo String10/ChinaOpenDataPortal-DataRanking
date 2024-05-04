@@ -59,13 +59,6 @@ def update_qdpairs_ranking():
     query_id = data.get("query_id")
     ranking = data.get("ranking")
 
-    qdpair = session_id_to_qd_pair.get(session_id)
-    if (
-        not qdpair
-        or qdpair["dataset_id"] != dataset_id
-        or qdpair["query_id"] != query_id
-    ):
-        return {"state": 1}
     try:
         update_ranking(dataset_id, query_id, ranking)
         del session_id_to_qd_pair[session_id]

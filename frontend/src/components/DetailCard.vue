@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { View as IconView } from '@element-plus/icons-vue'
 
 import { update_qdpairs_ranking } from '@/utils/fetch'
@@ -8,9 +8,13 @@ import type { Metadata, Query, RequestState } from '@/utils/types'
 const props = defineProps<{
   query: Query | null
   metadata: Metadata | null
+  last_rank: number
 }>()
 
-const rank = ref<number>(0)
+const rank = ref<number>(props.last_rank)
+watchEffect(() => {
+  rank.value = props.last_rank
+})
 
 // update ranking
 const emit = defineEmits(['refresh'])
@@ -26,7 +30,7 @@ const updateRanking = () =>
     (res) => {
       request_state.value = res
       if (res?.state === 0) {
-        emit('refresh')
+        emit('refresh', rank.value)
 
         rank.value = 0
         request_state.value = null
