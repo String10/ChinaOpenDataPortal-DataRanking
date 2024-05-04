@@ -38,7 +38,7 @@ const updateRanking = () =>
 <template>
   <el-card>
     <h3>{{ query?.query_text }}</h3>
-    <el-link :icon="IconView" :href="metadata?.url">{{ metadata?.url }}</el-link>
+    <el-link :icon="IconView" :href="metadata?.url" target="_blank">{{ metadata?.url }}</el-link>
     <div class="flex items-center text-sm">
       <el-radio-group v-model="rank" class="ml-4">
         <el-radio-button label="不相关" value="0" />
@@ -52,11 +52,18 @@ const updateRanking = () =>
     <el-divider />
     <el-table
       :data="
-        Object.entries(JSON.parse(metadata ? metadata.origin_metadata : '{}')).map(
-          ([key, value]) => ({
-            Key: key,
-            Value: String(value)
-          })
+        [
+          {
+            Key: 'Query / Dataset ID',
+            Value: `WHERE query_id = ${query?.query_id} AND dataset_id = ${metadata?.dataset_id}`
+          }
+        ].concat(
+          Object.entries(JSON.parse(metadata ? metadata.origin_metadata : '{}')).map(
+            ([key, value]) => ({
+              Key: key,
+              Value: String(value)
+            })
+          )
         )
       "
       style="width: 100%"
