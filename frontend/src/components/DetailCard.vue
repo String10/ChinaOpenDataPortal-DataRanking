@@ -58,12 +58,12 @@ const updateRanking = () =>
             Value: `WHERE query_id = ${query?.query_id} AND dataset_id = ${metadata?.dataset_id}`
           }
         ].concat(
-          Object.entries(JSON.parse(metadata ? metadata.origin_metadata : '{}')).map(
-            ([key, value]) => ({
+          Object.entries(JSON.parse(metadata ? metadata.origin_metadata : '{}'))
+            .filter(([_, value]) => value)
+            .map(([key, value]) => ({
               Key: key,
               Value: String(value)
-            })
-          )
+            }))
         )
       "
       style="width: 100%"
