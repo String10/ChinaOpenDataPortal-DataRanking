@@ -49,10 +49,11 @@ def fetch_all_qd_pair(amount: int):
     )
 
 
-def fetch_unranked_qd_pair(amount: int):
+def fetch_unranked_qd_pair(amount: int, cond: str = ""):
     return fetch_as_object(
         f"SELECT DISTINCT dataset_id, query_id FROM {RES_TABLE_NAME} "
         f"WHERE `rank` < 0 AND query_id >= {QUERY_ID_START} AND query_id <= {QUERY_ID_END} "
+        f"{f'AND {cond}' if len(cond) > 0 else ''} "
         f"ORDER BY query_id {f'LIMIT {amount}' if amount > 0 else ''}"
     )
 
