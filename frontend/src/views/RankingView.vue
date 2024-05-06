@@ -23,6 +23,12 @@ const rank = ref<number>(0)
 
 const history = ref<History[]>([])
 
+const load_data = (qdpair: QDPair) => {
+  fetch_query(qdpair.query_id).then((res) => (query.value = res))
+  fetch_metadata(qdpair.dataset_id).then((res) => (metadata.value = res))
+  fetch_datafile_path(qdpair.dataset_id).then((res) => (datafile.value = res))
+}
+
 const refresh = (rank: number) => {
   if (rank >= 0 && metadata.value && query.value) {
     const qdpairIndex = history.value.findIndex((qdpair) => {
@@ -46,16 +52,13 @@ const refresh = (rank: number) => {
     if (!res) {
       return
     }
-    fetch_query(res.query_id).then((res) => (query.value = res))
-    fetch_metadata(res.dataset_id).then((res) => (metadata.value = res))
-    fetch_datafile_path(res.dataset_id).then((res) => (datafile.value = res))
+    load_data(res)
   })
 }
 
 const check_history = (idx: number) => {
   const qdpair = history.value[idx]
-  fetch_query(qdpair.query_id).then((res) => (query.value = res))
-  fetch_metadata(qdpair.dataset_id).then((res) => (metadata.value = res))
+  load_data(qdpair)
   rank.value = qdpair.rank
 }
 
