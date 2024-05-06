@@ -10,7 +10,7 @@ def detect_encoding(file_path):
 
 def head(file_path, n=10):
     try:
-        with open(file_path, "r", encoding="gb2312", errors="ignore") as f:
+        with open(file_path, "r", encoding="gb2312") as f:
             lines = [line.strip() for line in itertools.islice(f, n)]
     except:
         with open(
