@@ -1,9 +1,11 @@
+import os
 from flask import Flask, make_response, request
 from flask_cors import CORS
 import uuid
 
 from util import head
 from db import (
+    FRONTEND_URL,
     fetch_metadata,
     fetch_query,
     fetch_unranked_qd_pair,
@@ -11,10 +13,9 @@ from db import (
     update_ranking,
 )
 
+
 app = Flask(__name__)
-CORS(
-    app, resources="/apis/*", supports_credentials=True, origins="http://127.0.0.1:5173"
-)
+CORS(app, resources="/apis/*", supports_credentials=True, origins=FRONTEND_URL)
 
 session_id_to_qd_pair = {}
 
