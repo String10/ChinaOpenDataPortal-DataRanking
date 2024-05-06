@@ -2,7 +2,14 @@ from flask import Flask, make_response, request
 from flask_cors import CORS
 import uuid
 
-from db import fetch_metadata, fetch_query, fetch_unranked_qd_pair, update_ranking
+from util import head
+from db import (
+    fetch_metadata,
+    fetch_query,
+    fetch_unranked_qd_pair,
+    fetch_datafile_path,
+    update_ranking,
+)
 
 app = Flask(__name__)
 CORS(
@@ -46,6 +53,17 @@ def get_query(query_id):
 @app.route("/apis/metadata/<dataset_id>", methods=["GET"])
 def get_metadata(dataset_id):
     return fetch_metadata(dataset_id)
+
+
+@app.route("/apis/metadata/datafilepath/<dataset_id>", methods=["GET"])
+def get_datafile_path(dataset_id):
+    return fetch_datafile_path(dataset_id)
+
+
+@app.route("/apis/datafile", methods=["GET"])
+def get_datafile_content():
+    data = request.args
+    return head(data.get("path"), int(data.get("num", default=10)))
 
 
 @app.route("/apis/qdpairs/ranking", methods=["POST"])

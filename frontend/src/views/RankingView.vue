@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import { ref, h } from 'vue'
 import { ElNotification } from 'element-plus'
+import { h, ref } from 'vue'
 
 import DetailCard from '@/components/DetailCard.vue'
 import TaskDesc from '@/components/TaskDesc.vue'
-import { fetch_metadata, fetch_qdpairs_unranked_one, fetch_query } from '@/utils/fetch'
-import type { QDPair, Metadata, Query } from '@/utils/types'
+import {
+  fetch_datafile_path,
+  fetch_metadata,
+  fetch_qdpairs_unranked_one,
+  fetch_query,
+  fetch_datafile_content
+} from '@/utils/fetch'
+import type { DataFilePath, Metadata, QDPair, Query } from '@/utils/types'
 
 interface History extends QDPair {
   rank: number
 }
 const query = ref<Query | null>(null)
 const metadata = ref<Metadata | null>(null)
+const datafile = ref<DataFilePath[]>([])
 const rank = ref<number>(0)
 
 const history = ref<History[]>([])
@@ -41,6 +48,7 @@ const refresh = (rank: number) => {
     }
     fetch_query(res.query_id).then((res) => (query.value = res))
     fetch_metadata(res.dataset_id).then((res) => (metadata.value = res))
+    fetch_datafile_path(res.dataset_id).then((res) => (datafile.value = res))
   })
 }
 
@@ -54,6 +62,8 @@ const check_history = (idx: number) => {
 refresh(-1)
 
 const active_items = ref<string[]>(['任务介绍', '标注历史'])
+const datafileContentVisible = ref(false)
+const datafileContent = ref<string[]>([])
 </script>
 
 <template>
@@ -63,6 +73,28 @@ const active_items = ref<string[]>(['任务介绍', '标注历史'])
         <el-collapse v-model="active_items">
           <el-collapse-item title="任务介绍" name="任务介绍">
             <TaskDesc />
+          </el-collapse-item>
+          <el-collapse-item title="数据文件" name="数据文件">
+            <el-table
+              :data="datafile"
+              :show-header="false"
+              style="width: 100%; margin-top: 8px"
+              max-height="400"
+              @row-click="
+                (row: DataFilePath) => {
+                  fetch_datafile_content(row.path).then((res) => {
+                    if (res) {
+                      datafileContent = res
+                    } else {
+                      datafileContent = ['文件内容为空']
+                    }
+                    datafileContentVisible = true
+                  })
+                }
+              "
+            >
+              <el-table-column prop="path" label="File Path" />
+            </el-table>
           </el-collapse-item>
           <el-collapse-item title="标注历史" name="标注历史">
             <el-table :data="history" style="width: 100%; margin-top: 8px" max-height="400">
@@ -99,5 +131,13 @@ const active_items = ref<string[]>(['任务介绍', '标注历史'])
         />
       </el-main>
     </el-container>
+    <el-dialog v-model="datafileContentVisible" title="数据文件" width="500">
+      <span v-for="(line, index) in datafileContent" :key="index"> {{ line }} <br /> </span>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="datafileContentVisible = false"> 确定 </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>

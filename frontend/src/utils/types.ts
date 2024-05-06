@@ -12,6 +12,11 @@ export type Metadata = {
   url: string
 }
 
+export type DataFilePath = {
+  dataset_id: string
+  path: string
+}
+
 export type QDPair = {
   query_id: string
   dataset_id: string

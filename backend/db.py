@@ -13,6 +13,7 @@ DB_PSWD = os.getenv("DB_PSWD")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 RES_TABLE_NAME = os.getenv("RES_TABLE_NAME")
 METADATA_TABLE_NAME = os.getenv("METADATA_TABLE_NAME")
+DATAFILE_TABLE_NAME = os.getenv("DATAFILE_TABLE_NAME")
 QUERY_TABLE_NAME = os.getenv("QUERY_TABLE_NAME")
 QUERY_ID_START = os.getenv("QUERY_ID_START")
 QUERY_ID_END = os.getenv("QUERY_ID_END")
@@ -70,6 +71,13 @@ def fetch_metadata(dataset_id: int):
     )[0]
     metadata["url"] = URLExtract().find_urls(metadata["origin_metadata"])[0]
     return metadata
+
+
+def fetch_datafile_path(dataset_id: int):
+    datafile_paths = fetch_as_object(
+        f"SELECT * FROM {DATAFILE_TABLE_NAME} WHERE dataset_id = {dataset_id}"
+    )
+    return datafile_paths
 
 
 def update_ranking(dataset_id: int, query_id: int, rank: int):
