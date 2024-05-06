@@ -24,4 +24,5 @@ export type QDPair = {
 
 export type RequestState = {
   state: number
+  message?: string
 }

@@ -1,4 +1,3 @@
-import os
 from flask import Flask, make_response, request
 from flask_cors import CORS
 import uuid
@@ -71,7 +70,7 @@ def get_datafile_content():
 def update_qdpairs_ranking():
     session_id = request.cookies.get("session_id")
     if not session_id:
-        return {"state": 1}
+        return {"state": 1, "message": "no session id"}
 
     data = request.get_json()
     dataset_id = data.get("dataset_id")
@@ -82,5 +81,5 @@ def update_qdpairs_ranking():
         update_ranking(dataset_id, query_id, ranking)
         del session_id_to_qd_pair[session_id]
     except:
-        return {"state": 1}
+        return {"state": 1, "message": "error while update ranking"}
     return {"state": 0}
