@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, h } from 'vue'
+import { ElNotification } from 'element-plus'
 
 import DetailCard from '@/components/DetailCard.vue'
-import TaskCard from '@/components/TaskCard.vue'
+import TaskDesc from '@/components/TaskDesc.vue'
 import { fetch_metadata, fetch_qdpairs_unranked_one, fetch_query } from '@/utils/fetch'
 import type { QDPair, Metadata, Query } from '@/utils/types'
 
@@ -27,7 +28,7 @@ const refresh = (rank: number) => {
     if (qdpairIndex !== -1) {
       history.value[qdpairIndex].rank = rank
     } else {
-      history.value.push({
+      history.value.unshift({
         dataset_id: metadata.value.dataset_id,
         query_id: query.value.query_id,
         rank: rank
@@ -51,25 +52,33 @@ const check_history = (idx: number) => {
 }
 
 refresh(-1)
+
+const active_items = ref<string[]>(['任务介绍', '标注历史'])
 </script>
 
 <template>
   <div class="common-layout">
     <el-container>
-      <el-aside width="300px">
-        <TaskCard />
-        <el-table :data="history" style="width: 100%; margin-top: 8px" max-height="800">
-          <el-table-column prop="dataset_id" label="Dataset ID" />
-          <el-table-column prop="query_id" label="Query ID" />
-          <el-table-column prop="rank" label="Rank" />
-          <el-table-column fixed="right" label="Check">
-            <template #default="scope">
-              <el-button link type="primary" @click.prevent="check_history(scope.$index)">
-                Check
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+      <el-aside width="350px">
+        <el-collapse v-model="active_items">
+          <el-collapse-item title="任务介绍" name="任务介绍">
+            <TaskDesc />
+          </el-collapse-item>
+          <el-collapse-item title="标注历史" name="标注历史">
+            <el-table :data="history" style="width: 100%; margin-top: 8px" max-height="400">
+              <el-table-column prop="dataset_id" label="Dataset ID" />
+              <el-table-column prop="query_id" label="Query ID" />
+              <el-table-column prop="rank" label="Rank" />
+              <el-table-column fixed="right" label="Check">
+                <template #default="scope">
+                  <el-button link type="primary" @click.prevent="check_history(scope.$index)">
+                    Check
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-collapse-item>
+        </el-collapse>
       </el-aside>
       <el-main>
         <DetailCard
@@ -80,6 +89,11 @@ refresh(-1)
             (new_rank) => {
               rank = 0
               refresh(+new_rank)
+
+              ElNotification({
+                title: '标注统计',
+                message: h('i', { style: 'color: teal' }, `已标注 ${history.length} 条数据`)
+              })
             }
           "
         />
